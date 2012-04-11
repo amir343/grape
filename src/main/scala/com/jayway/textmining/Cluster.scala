@@ -33,6 +33,10 @@ case class Cluster(initialDoc:Document) {
     docs += doc
   }
 
+  def removeDocument(doc:Document) {
+    docs -= doc
+  }
+
   def calculateNewCentroid() {
     centroid = Centroid(docs.map( _.weightedTerms ).reduce(_ |+| _).mapValues( _ / docs.size.asInstanceOf[Double]))
   }

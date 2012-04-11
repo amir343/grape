@@ -24,7 +24,7 @@ case class VectorSpace() {
 
   private val _dimensions:mutable.Set[String] = mutable.Set[String]()
 
-  def addDimension(nns:List[String]) {
+  def addDimension(nns:Set[String]) {
     _dimensions ++= nns
   }
 
