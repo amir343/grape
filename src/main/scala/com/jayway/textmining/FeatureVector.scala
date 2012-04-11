@@ -20,15 +20,10 @@ import collection.immutable.ListMap
  * @author Amir Moulavi
  */
 
-case class Document(content:String, nouns:List[String]) extends FeatureVector {
+trait FeatureVector {
 
-  lazy val uniqueNouns:Set[String] = nouns.toSet
+  def weightedTerms:Map[String, Double]
 
-  // number of occurrences of each unique noun
-  lazy val weightedTerms:Map[String, Double] = { for {
-    term <- uniqueNouns
-    weight = nouns.count( _ == term ).asInstanceOf[Double]
-  } yield (term, weight) }.map(identity)(collection.breakOut)
+  def weightedSum:Double
 
-  lazy val weightedSum:Double = scala.math.sqrt(weightedTerms.map( (wt) => wt._2 * wt._2 ).sum)
 }

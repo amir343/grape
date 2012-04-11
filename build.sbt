@@ -13,6 +13,7 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
     "com.typesafe.akka" % "akka-actor" % "2.0",
+    "org.scalaz" %% "scalaz-core" % "6.0.4",
 	"org.apache.opennlp" % "opennlp-tools" % "1.5.2-incubating",
     "org.apache.opennlp" % "opennlp-maxent" % "3.0.2-incubating"
 )

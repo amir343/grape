@@ -1,5 +1,9 @@
 package com.jayway.textmining
 
+import scala.collection.mutable
+import scalaz._
+import Scalaz._
+
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
  *
@@ -18,11 +22,19 @@ package com.jayway.textmining
  * @author Amir Moulavi
  */
 
-case class SimCosine(vectorSpace:VectorSpace) {
+case class Cluster(initialDoc:Document) {
 
-  def sim(document1:Document, document2:Document):Double = {
-    val weightedTermsSumProduction = vectorSpace.dimensions.map( term => document1.weightedTerms.getOrElse(term, 0) * document2.weightedTerms.getOrElse(term, 0)).sum
-    weightedTermsSumProduction / (document1.weightedSum * document2.weightedSum)
+  private val docs:mutable.ListBuffer[Document] = mutable.ListBuffer[Document]()
+  var centroid:Centroid = Centroid(initialDoc.weightedTerms)
+
+  docs += initialDoc
+
+  def addDocument(doc:Document) {
+    docs += doc
+  }
+
+  def calculateNewCentroid() {
+    centroid = Centroid(docs.map( _.weightedTerms ).reduce(_ |+| _).mapValues( _ / docs.size.asInstanceOf[Double]))
   }
 
 }

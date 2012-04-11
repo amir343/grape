@@ -1,7 +1,5 @@
 package com.jayway.textmining
 
-import collection.immutable.ListMap
-
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
  *
@@ -20,15 +18,13 @@ import collection.immutable.ListMap
  * @author Amir Moulavi
  */
 
-case class Document(content:String, nouns:List[String]) extends FeatureVector {
+case class MathUtils(vectorSpace:VectorSpace) {
 
-  lazy val uniqueNouns:Set[String] = nouns.toSet
+  def simCosine(doc1:FeatureVector, doc2:FeatureVector):Double = {
+    val weightedTermsSumProduction = vectorSpace.dimensions.map( term => doc1.weightedTerms.getOrElse(term, 0.0) * doc2.weightedTerms.getOrElse(term, 0.0)).sum
+    weightedTermsSumProduction / (doc1.weightedSum * doc2.weightedSum)
+  }
 
-  // number of occurrences of each unique noun
-  lazy val weightedTerms:Map[String, Double] = { for {
-    term <- uniqueNouns
-    weight = nouns.count( _ == term ).asInstanceOf[Double]
-  } yield (term, weight) }.map(identity)(collection.breakOut)
+  def euclideanDistance(doc1:FeatureVector, doc2:FeatureVector):Double = 1 - simCosine(doc1, doc2)
 
-  lazy val weightedSum:Double = scala.math.sqrt(weightedTerms.map( (wt) => wt._2 * wt._2 ).sum)
 }
