@@ -54,6 +54,7 @@ class KMeanClusterSpec extends Specification with TestData {
       clusters.size mustEqual k
       success
     }
+
     "the total number of documents should be the same as total number of documents in each cluster" in {
       val k = 3
       val kmeanCluster = KMeanCluster(documents, k)

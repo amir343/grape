@@ -22,7 +22,9 @@ import com.weiglewilczek.slf4s.Logging
  * @author Amir Moulavi
  */
 
-case class KMeanCluster(documents:List[Document], k:Int) extends Logging {
+case class KMeanCluster(documents:List[Document], k:Int)
+  extends RandomSelector
+  with Logging {
 
   require( k < documents.size, "'k' can not be greater than the document size" )
 
@@ -31,14 +33,13 @@ case class KMeanCluster(documents:List[Document], k:Int) extends Logging {
 
   val documentMap = mutable.Map[Document, Cluster]()
 
-  val clusters:List[Cluster] = selectRandomInitialCluster
+  val clusters:List[Cluster] = selectRandomInitialCluster(k, documents, documentMap)
 
   val vectorSpace = VectorSpace()
   documents.foreach( d => vectorSpace.addDimension(d.uniqueNouns))
   logger.info("Vector space dimensions: %s".format(vectorSpace.dimensions.size))
 
   val mathUtils = MathUtils(vectorSpace)
-
 
   def doCluster():List[Cluster] = {
     for ( i <- 0 until iterations) {
@@ -65,21 +66,5 @@ case class KMeanCluster(documents:List[Document], k:Int) extends Logging {
   private def updateCentroids() {
     clusters.foreach(_.calculateNewCentroid())
   }
-
-  private def selectRandomInitialCluster:List[Cluster] = {
-    var docs = documents
-    val r = new Random
-    val seeds = mutable.ListBuffer[Cluster]()
-    for ( i <- 0 until k) {
-      val selected = docs(r.nextInt(k))
-      docs = docs.filterNot(_ == selected)
-      val cluster = Cluster(selected)
-      documentMap += (selected -> cluster)
-      seeds += cluster
-    }
-    seeds.toList
-  }
-
-
 
 }
