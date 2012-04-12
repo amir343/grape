@@ -4,6 +4,7 @@ import java.io.{FileInputStream, InputStream}
 import opennlp.tools.postag.{POSTaggerME, POSModel}
 import opennlp.tools.tokenize.{TokenizerME, TokenizerModel}
 import scala.collection.mutable
+import com.weiglewilczek.slf4s.Logging
 
 
 /**
@@ -23,7 +24,7 @@ import scala.collection.mutable
  *
  * @author Amir Moulavi
  */
-class NLP {
+class NLP extends Logging {
 
   var posModelIn:InputStream = null
   var tokenizerModelIn:InputStream = null
@@ -35,7 +36,11 @@ class NLP {
     tokenizerModel = new TokenizerModel(tokenizerModelIn)
     posModelIn = new FileInputStream("src/main/resources/en-pos-maxent.bin")
     posModel = new POSModel(posModelIn)
-  } catch { case e => e.printStackTrace()}
+  } catch {
+    case e =>
+      e.printStackTrace()
+      logger.error("Could not load model files")
+  }
 
   finally {
     if (posModelIn != null && tokenizerModelIn != null) {
@@ -43,24 +48,33 @@ class NLP {
         posModelIn.close()
         tokenizerModelIn.close()
       }
-      catch { case e => e.printStackTrace() }
+      catch {
+        case e =>
+          e.printStackTrace()
+          logger.error("Could not close model files")
+      }
     }
   }
 
-  def extractNouns(content:String):Document = {
+  def createDocumentFrom(fileName:String, content:String):Document = {
     val nouns:mutable.ListBuffer[String] = mutable.ListBuffer[String]()
     if (posModelIn != null && tokenizerModelIn != null) {
       val tokenizer = new TokenizerME(tokenizerModel)
+      logger.info("Tokenizing document '%s'".format(fileName))
       val sent = tokenizer.tokenize(content)
+      logger.info("Done tokenizing")
       val tagger = new POSTaggerME(posModel)
+      logger.info("PoS tagging document '%s'".format(fileName))
       val tags = tagger.tag(sent)
+      logger.info("Done PoS tagging")
       for (i <- 0 until tags.length) {
         if (tags.apply(i).contains("NN")) {
           nouns += sent.apply(i)
         }
       }
+      logger.info("%s noun(s) is extracted from the document '%s'".format(nouns.size, fileName))
     }
-    Document(content, nouns.toList)
+    Document(fileName, content, nouns.toList)
   }
 
 

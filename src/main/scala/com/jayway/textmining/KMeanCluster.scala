@@ -2,6 +2,7 @@ package com.jayway.textmining
 
 import util.Random
 import collection.mutable
+import com.weiglewilczek.slf4s.Logging
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,11 +22,12 @@ import collection.mutable
  * @author Amir Moulavi
  */
 
-case class KMeanCluster(documents:List[Document], k:Int) {
+case class KMeanCluster(documents:List[Document], k:Int) extends Logging {
 
   require( k < documents.size, "'k' can not be greater than the document size" )
 
   val iterations:Int = 100
+  logger.info("Number of iterations: %s".format(iterations))
 
   val documentMap = mutable.Map[Document, Cluster]()
 
@@ -33,6 +35,7 @@ case class KMeanCluster(documents:List[Document], k:Int) {
 
   val vectorSpace = VectorSpace()
   documents.foreach( d => vectorSpace.addDimension(d.uniqueNouns))
+  logger.info("Vector space dimensions: %s".format(vectorSpace.dimensions.size))
 
   val mathUtils = MathUtils(vectorSpace)
 

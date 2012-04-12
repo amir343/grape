@@ -41,4 +41,6 @@ case class Cluster(initialDoc:Document) {
     centroid = Centroid(docs.map( _.weightedTerms ).reduce(_ |+| _).mapValues( _ / docs.size.asInstanceOf[Double]))
   }
 
+  def currentDocs:List[Document] = docs.toList
+
 }

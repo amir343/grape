@@ -20,7 +20,7 @@ import collection.immutable.ListMap
  * @author Amir Moulavi
  */
 
-case class Document(content:String, nouns:List[String]) extends FeatureVector {
+case class Document(fileName:String, content:String, nouns:List[String]) extends FeatureVector {
 
   lazy val uniqueNouns:Set[String] = nouns.toSet
 
