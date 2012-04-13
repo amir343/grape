@@ -1,7 +1,7 @@
 package com.jayway.textmining
 
-import collection.mutable
-import util.Random
+import java.io.File
+import org.apache.commons.io.FileUtils
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,22 +21,13 @@ import util.Random
  * @author Amir Moulavi
  */
 
-trait RandomSelector {
+trait TestData {
 
-  implicit val dMap:mutable.Map[Document, Cluster] = mutable.Map[Document, Cluster]()
+  private val resourcesDir = new File("src/test/resources")
+  private val files:List[File] = resourcesDir.listFiles().toList
+  private val docs = files.map( f => (f.getName, FileUtils.readFileToString(f, "UTF-8")))
+  private val nlp = new NLP
 
-  def selectRandomInitialCluster(K:Int, documents:List[Document])(implicit documentMap:mutable.Map[Document, Cluster]):List[Cluster] = {
-    var docs = documents map identity
-    val r = new Random
-    val seeds = mutable.ListBuffer[Cluster]()
-    for ( i <- 0 until K ) {
-      val selected = docs(r.nextInt(K))
-      docs = docs.filterNot(_ == selected)
-      val cluster = Cluster(selected)
-      documentMap += (selected -> cluster)
-      seeds += cluster
-    }
-    seeds.toList
-  }
+  val documents:List[Document] = docs.map ( t => nlp.createDocumentFrom(t._1, t._2) )
 
 }

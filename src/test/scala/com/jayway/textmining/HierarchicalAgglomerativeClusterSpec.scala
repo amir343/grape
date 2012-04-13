@@ -1,7 +1,6 @@
 package com.jayway.textmining
 
-import collection.mutable
-import util.Random
+import org.specs2.mutable.Specification
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,22 +20,17 @@ import util.Random
  * @author Amir Moulavi
  */
 
-trait RandomSelector {
+class HierarchicalAgglomerativeClusterSpec
+  extends Specification
+  with TestData {
 
-  implicit val dMap:mutable.Map[Document, Cluster] = mutable.Map[Document, Cluster]()
-
-  def selectRandomInitialCluster(K:Int, documents:List[Document])(implicit documentMap:mutable.Map[Document, Cluster]):List[Cluster] = {
-    var docs = documents map identity
-    val r = new Random
-    val seeds = mutable.ListBuffer[Cluster]()
-    for ( i <- 0 until K ) {
-      val selected = docs(r.nextInt(K))
-      docs = docs.filterNot(_ == selected)
-      val cluster = Cluster(selected)
-      documentMap += (selected -> cluster)
-      seeds += cluster
+  "HAC algorithm" should {
+    "find initial seeds for a given k" in {
+      val k = 2
+      val clusters = HierarchicalAgglomerativeCluster(k, documents).findInitialSeeds()
+      clusters.size mustEqual k
+      success
     }
-    seeds.toList
   }
 
 }

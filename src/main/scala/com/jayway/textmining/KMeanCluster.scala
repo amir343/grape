@@ -1,6 +1,5 @@
 package com.jayway.textmining
 
-import util.Random
 import collection.mutable
 import com.weiglewilczek.slf4s.Logging
 
@@ -33,7 +32,7 @@ case class KMeanCluster(documents:List[Document], k:Int)
 
   val documentMap = mutable.Map[Document, Cluster]()
 
-  val clusters:List[Cluster] = selectRandomInitialCluster(k, documents, documentMap)
+  val clusters:List[Cluster] = selectRandomInitialCluster(k, documents)(documentMap)
 
   val vectorSpace = VectorSpace()
   documents.foreach( d => vectorSpace.addDimension(d.uniqueNouns))

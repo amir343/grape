@@ -22,17 +22,6 @@ import scala.collection.JavaConverters._
  * @author Amir Moulavi
  */
 
-trait TestData {
-
-  private val resourcesDir = new File("src/test/resources")
-  private val files:List[File] = resourcesDir.listFiles().toList
-  private val docs = files.map( f => (f.getName, FileUtils.readFileToString(f, "UTF-8")))
-  private val nlp = new NLP
-
-  val documents:List[Document] = docs.map ( t => nlp.createDocumentFrom(t._1, t._2) )
-
-}
-
 class KMeanClusterSpec extends Specification with TestData {
 
   "Weighted Terms" should {

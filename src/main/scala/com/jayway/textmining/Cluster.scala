@@ -41,6 +41,10 @@ case class Cluster(initialDoc:Document) {
     centroid = Centroid(docs.map( _.weightedTerms ).reduce(_ |+| _).mapValues( _ / docs.size.asInstanceOf[Double]))
   }
 
+  def mergeWith(cluster:Cluster) {
+    cluster.currentDocs.foreach( d => this.addDocument(d) )
+  }
+
   def currentDocs:List[Document] = docs.toList
 
 }
