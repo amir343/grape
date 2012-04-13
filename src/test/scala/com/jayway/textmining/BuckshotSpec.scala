@@ -20,24 +20,23 @@ import org.specs2.mutable.Specification
  * @author Amir Moulavi
  */
 
-class HierarchicalAgglomerativeClusterSpec
-  extends Specification
-  with TestData {
+class BuckshotSpec extends Specification with TestData {
 
-  val hac = HierarchicalAgglomerativeCluster(2, documents)
-  val clusters:List[Cluster] = hac.clusterDocuments()
+  val k = 2
+  val buckshot = Buckshot(k, documents)
+  val clusters = buckshot.clusterDocument
 
-  "cluster size in HAC algorithm" should {
-    "equal sqrt(kn)" in {
-      clusters.size mustEqual hac.k
-      success
+  "In Buckshot algorithm, number of cluster" should {
+    "equal the given k" in {
+      clusters.size mustEqual k
     }
   }
 
-  "document number in all clusters in HAC algorithm" should {
-    "equal the initial number of documents" in {
-      clusters.map( c => c.currentDocs.size ).sum mustEqual documents.size
+  "In Buckshot algorithm, number of total document in all clusters" should {
+    "equal the original number of documents" in {
+      clusters.map( c => c.currentDocs.size).sum mustEqual documents.size
     }
   }
+
 
 }

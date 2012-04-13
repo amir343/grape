@@ -26,6 +26,7 @@ case class KMeanCluster(documents:List[Document], k:Int)
   with Logging {
 
   require( k < documents.size, "'k' can not be greater than the document size" )
+  require(k > 0, "K must be a positive non-zero integer")
 
   val iterations:Int = 100
   logger.info("Number of iterations: %s".format(iterations))

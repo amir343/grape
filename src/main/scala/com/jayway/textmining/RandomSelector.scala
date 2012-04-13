@@ -1,6 +1,6 @@
 package com.jayway.textmining
 
-import collection.mutable
+import scala.collection.mutable
 import util.Random
 
 /**

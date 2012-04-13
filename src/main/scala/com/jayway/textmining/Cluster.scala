@@ -38,11 +38,16 @@ case class Cluster(initialDoc:Document) {
   }
 
   def calculateNewCentroid() {
-    centroid = Centroid(docs.map( _.weightedTerms ).reduce(_ |+| _).mapValues( _ / docs.size.asInstanceOf[Double]))
+    if (docs.size > 0)
+      centroid = Centroid(docs.map( _.weightedTerms ).reduce(_ |+| _).mapValues( _ / docs.size.asInstanceOf[Double]))
   }
 
   def mergeWith(cluster:Cluster) {
     cluster.currentDocs.foreach( d => this.addDocument(d) )
+  }
+
+  def resetDocuments() {
+    docs.clear()
   }
 
   def currentDocs:List[Document] = docs.toList

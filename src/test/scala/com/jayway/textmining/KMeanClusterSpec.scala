@@ -24,32 +24,19 @@ import scala.collection.JavaConverters._
 
 class KMeanClusterSpec extends Specification with TestData {
 
-  "Weighted Terms" should {
-    "have extracted nouns with their equivalent number of occurrences" in {
-      documents.foreach { d =>
-        println(d.fileName)
-        println(d.weightedTerms)
-        println("***********************************************************")
-      }
-      success
-    }
-  }
+  val k = 2
+  val kmeanCluster = KMeanCluster(documents, k)
+  val clusters = kmeanCluster.doCluster()
 
   "KMean Clustering" should {
     "have exactly the same number of given K as its number of cluster at the end" in {
-      val k = 2
-      val kmeanCluster = KMeanCluster(documents, k)
-      val clusters = kmeanCluster.doCluster()
       clusters.size mustEqual k
-      success
     }
+  }
 
+  "Kmean Clustering" should {
     "the total number of documents should be the same as total number of documents in each cluster" in {
-      val k = 3
-      val kmeanCluster = KMeanCluster(documents, k)
-      val clusters = kmeanCluster.doCluster()
       clusters.map(_.currentDocs.size).sum mustEqual documents.size
-      success
     }
   }
 

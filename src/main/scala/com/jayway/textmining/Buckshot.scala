@@ -1,7 +1,6 @@
 package com.jayway.textmining
 
 import com.weiglewilczek.slf4s.Logging
-import collection.mutable
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,35 +20,31 @@ import collection.mutable
  * @author Amir Moulavi
  */
 
-case class HierarchicalAgglomerativeCluster(k:Int, documents:List[Document])
-  extends Logging {
+case class Buckshot(k:Int, documents:List[Document]) extends RandomSelector with Logging {
 
   require(k < documents.size, "K can not be greater than number of documents")
   require(k > 0, "K must be a positive non-zero integer")
-
-  val clusters:List[Cluster] = documents.map( d => Cluster(d) )
 
   val vectorSpace = VectorSpace()
   documents.foreach( d => vectorSpace.addDimension(d.uniqueNouns))
 
   val mathUtils = MathUtils(vectorSpace)
 
-  def clusterDocuments():List[Cluster] = {
-    val clusterVector = mutable.ListBuffer[Cluster]()
-    clusters.foreach { c => clusterVector += c }
-    while ( clusterVector.size > k ) {
-      val combinations = for {
-        i <- 0 until clusterVector.size
-        j <- i+1 until clusterVector.size
-        c1 = clusterVector(i)
-        c2 = clusterVector(j)
-      } yield (c1, c2, mathUtils.euclideanDistance(c1.centroid, c2.centroid))
-      val (cluster1, cluster2, _) = combinations.sortWith( (comb1, comb2) => comb1._3.compareTo(comb2._3) < 0).head
-      cluster1.mergeWith(cluster2)
-      clusterVector -= cluster2
-      clusterVector.foreach { c => c.calculateNewCentroid() }
+  def clusterDocument:List[Cluster] = {
+    val selectedClusters = `select kd random document`
+    val selectedDocs = selectedClusters.map( c => c.currentDocs.head )
+    val remainingDocs = documents diff selectedDocs
+    val clusters = HierarchicalAgglomerativeCluster(k, selectedDocs).clusterDocuments()
+    clusters.foreach( c => c.calculateNewCentroid() )
+    remainingDocs.foreach { d =>
+      val distances = clusters.map( c => (c, mathUtils.euclideanDistance(d, c.centroid)) )
+      val closestCluster = distances.sortWith( (c1, c2) => c1._2.compareTo(c2._2) < 0).head._1
+      closestCluster.addDocument(d)
     }
-    clusterVector.toList
+    clusters
   }
 
+
+  private def `select kd random document`:List[Cluster] =
+    selectRandomInitialCluster(math.sqrt((k*documents.size).asInstanceOf[Double]).asInstanceOf[Int], documents)
 }
