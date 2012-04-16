@@ -2,6 +2,8 @@ package com.jayway.textmining
 
 import collection.mutable
 import com.weiglewilczek.slf4s.Logging
+import java.io.File
+import scalaz.{Failure, Success}
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,12 +23,20 @@ import com.weiglewilczek.slf4s.Logging
  * @author Amir Moulavi
  */
 
-case class KMeanCluster(documents:List[Document], k:Int)
+class KMeanCluster(files:List[File], k:Int)
   extends RandomSelector
-  with Logging {
+  with FileReader
+  with Logging { this:FeatureSelection =>
 
-  require( k < documents.size, "'k' can not be greater than the document size" )
+  require( k < files.size, "'k' can not be greater than the document size" )
   require(k > 0, "K must be a positive non-zero integer")
+
+  val fileContents:List[String] = readFiles(files) match {
+    case Success(x) => x
+    case Failure(x) => throw new RuntimeException(x)
+  }
+
+  val documents:List[Document] = selectFeatures(files.map( f => f.getName ).zip(fileContents))
 
   val iterations:Int = 100
   logger.info("Number of iterations: %s".format(iterations))

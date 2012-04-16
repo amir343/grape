@@ -1,6 +1,8 @@
 package com.jayway.textmining
 
 import com.weiglewilczek.slf4s.Logging
+import java.io.File
+import scalaz.{Failure, Success}
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -20,10 +22,20 @@ import com.weiglewilczek.slf4s.Logging
  * @author Amir Moulavi
  */
 
-case class Buckshot(k:Int, documents:List[Document]) extends RandomSelector with Logging {
+class Buckshot(k:Int, files:List[File])
+  extends RandomSelector
+  with FileReader
+  with Logging { this:FeatureSelection =>
 
-  require(k < documents.size, "K can not be greater than number of documents")
+  require(k < files.size, "K can not be greater than number of documents")
   require(k > 0, "K must be a positive non-zero integer")
+
+  val fileContents:List[String] = readFiles(files) match {
+    case Success(x) => x
+    case Failure(x) => throw new RuntimeException(x)
+  }
+
+  val documents:List[Document] = selectFeatures(files.map( f => f.getName ).zip(fileContents))
 
   val vectorSpace = VectorSpace()
   documents.foreach( d => vectorSpace.addDimension(d.uniqueNouns))
@@ -31,10 +43,10 @@ case class Buckshot(k:Int, documents:List[Document]) extends RandomSelector with
   val mathUtils = MathUtils(vectorSpace)
 
   def clusterDocument:List[Cluster] = {
-    val selectedClusters = `select kd random document`
-    val selectedDocs = selectedClusters.map( c => c.currentDocs.head )
-    val remainingDocs = documents diff selectedDocs
-    val clusters = HierarchicalAgglomerativeCluster(k, selectedDocs).clusterDocuments()
+    val selectedFiles = `select kd random document`
+    val remainingFiles = files diff selectedFiles
+    val remainingDocs = convertFilesToDocuments(remainingFiles)
+    val clusters = (new HierarchicalAgglomerativeCluster(k, selectedFiles) with NLPFeatureSelection).clusterDocuments()
     clusters.foreach( c => c.calculateNewCentroid() )
     remainingDocs.foreach { d =>
       val distances = clusters.map( c => (c, mathUtils.euclideanDistance(d, c.centroid)) )
@@ -44,7 +56,11 @@ case class Buckshot(k:Int, documents:List[Document]) extends RandomSelector with
     clusters
   }
 
+  private def convertFilesToDocuments(list:List[File]):List[Document] = {
+    val convertedFiles = list.map(f => f.getName).zip(list.map(f => f.getPath))
+    selectFeatures(convertedFiles)
+  }
 
-  private def `select kd random document`:List[Cluster] =
-    selectRandomInitialCluster(math.sqrt((k*documents.size).asInstanceOf[Double]).asInstanceOf[Int], documents)
+  private def `select kd random document`:List[File] =
+    selectRandom[File](math.sqrt((k*documents.size).asInstanceOf[Double]).asInstanceOf[Int], files)
 }

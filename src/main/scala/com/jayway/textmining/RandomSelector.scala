@@ -39,4 +39,17 @@ trait RandomSelector {
     seeds.toList
   }
 
+  def selectRandom[A](K:Int, documents:List[A]):List[A] = {
+    var docs = documents map identity
+    val r = new Random
+    val seeds = mutable.ListBuffer[A]()
+    for ( i <- 0 until K ) {
+      val selected = docs(r.nextInt(K))
+      docs = docs.filterNot(_ == selected)
+      seeds += selected
+    }
+    seeds.toList
+  }
+
+
 }

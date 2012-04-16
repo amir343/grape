@@ -1,8 +1,6 @@
 package com.jayway.textmining
 
 import org.specs2.mutable.Specification
-import org.apache.commons.io.FileUtils
-import java.io.File
 import scala.collection.JavaConverters._
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -25,7 +23,7 @@ import scala.collection.JavaConverters._
 class KMeanClusterSpec extends Specification with TestData {
 
   val k = 2
-  val kmeanCluster = KMeanCluster(documents, k)
+  val kmeanCluster = new KMeanCluster(files, k) with NLPFeatureSelection
   val clusters = kmeanCluster.doCluster()
 
   "KMean Clustering" should {

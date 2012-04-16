@@ -2,6 +2,8 @@ package com.jayway.textmining
 
 import com.weiglewilczek.slf4s.Logging
 import collection.mutable
+import scalaz.{Failure, Success}
+import java.io.File
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,11 +23,21 @@ import collection.mutable
  * @author Amir Moulavi
  */
 
-case class HierarchicalAgglomerativeCluster(k:Int, documents:List[Document])
-  extends Logging {
+class HierarchicalAgglomerativeCluster(k:Int, files:List[File])
+  extends Logging
+  with FileReader { this:FeatureSelection =>
 
-  require(k < documents.size, "K can not be greater than number of documents")
+  require(k < files.size, "K can not be greater than number of documents")
   require(k > 0, "K must be a positive non-zero integer")
+
+  def getK = k
+
+  val fileContents:List[String] = readFiles(files) match {
+    case Success(x) => x
+    case Failure(x) => throw new RuntimeException(x)
+  }
+
+  val documents:List[Document] = selectFeatures(files.map( f => f.getName ).zip(fileContents))
 
   val clusters:List[Cluster] = documents.map( d => Cluster(d) )
 

@@ -1,8 +1,5 @@
 package com.jayway.textmining
 
-import java.io.File
-import org.apache.commons.io.FileUtils
-
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
  *
@@ -21,13 +18,13 @@ import org.apache.commons.io.FileUtils
  * @author Amir Moulavi
  */
 
-trait TestData {
+trait FeatureSelection {
+  def selectFeatures(files:List[(String, String)]):List[Document]
+}
 
-  private val resourcesDir = new File("src/test/resources")
-  val files:List[File] = resourcesDir.listFiles().toList
-  private val docs = files.map( f => (f.getName, FileUtils.readFileToString(f, "UTF-8")))
-  private val nlp = new NLP
-
-  val documents:List[Document] = docs.map ( t => nlp.createDocumentFrom(t._1, t._2) )
-
+trait NLPFeatureSelection extends FeatureSelection {
+  def selectFeatures(files:List[(String, String)]):List[Document] = {
+    val nlp = new NLP
+    files.map( f => nlp.createDocumentFrom(f._1, f._2) )
+  }
 }

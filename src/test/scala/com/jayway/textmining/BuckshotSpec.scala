@@ -23,7 +23,7 @@ import org.specs2.mutable.Specification
 class BuckshotSpec extends Specification with TestData {
 
   val k = 2
-  val buckshot = Buckshot(k, documents)
+  val buckshot = new Buckshot(k, files) with NLPFeatureSelection
   val clusters = buckshot.clusterDocument
 
   "In Buckshot algorithm, number of cluster" should {

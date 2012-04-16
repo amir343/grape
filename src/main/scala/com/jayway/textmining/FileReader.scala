@@ -1,7 +1,9 @@
 package com.jayway.textmining
 
-import java.io.File
 import org.apache.commons.io.FileUtils
+import java.io.File
+import scalaz._
+import Scalaz._
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,13 +23,10 @@ import org.apache.commons.io.FileUtils
  * @author Amir Moulavi
  */
 
-trait TestData {
+trait FileReader {
 
-  private val resourcesDir = new File("src/test/resources")
-  val files:List[File] = resourcesDir.listFiles().toList
-  private val docs = files.map( f => (f.getName, FileUtils.readFileToString(f, "UTF-8")))
-  private val nlp = new NLP
-
-  val documents:List[Document] = docs.map ( t => nlp.createDocumentFrom(t._1, t._2) )
-
+  def readFiles(filesPath:List[File]):Validation[String, List[String]] = {
+    try { filesPath.map { f => FileUtils.readFileToString(f) }.success }
+    catch { case e:Exception => e.getMessage.fail }
+  }
 }

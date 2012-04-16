@@ -24,12 +24,12 @@ class HierarchicalAgglomerativeClusterSpec
   extends Specification
   with TestData {
 
-  val hac = HierarchicalAgglomerativeCluster(2, documents)
+  val hac = new HierarchicalAgglomerativeCluster(2, files) with NLPFeatureSelection
   val clusters:List[Cluster] = hac.clusterDocuments()
 
   "cluster size in HAC algorithm" should {
     "equal sqrt(kn)" in {
-      clusters.size mustEqual hac.k
+      clusters.size mustEqual hac.getK
       success
     }
   }
