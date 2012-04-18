@@ -38,9 +38,8 @@ class NLP extends Logging {
     val sent = tokenize(fileName, content)
     val tags = posTag(fileName, sent)
     for (i <- 0 until tags.length) {
-      if (tags.apply(i).contains("NN")) {
-        nouns += sent.apply(i)
-      }
+      if (tags(i) == "NN" || tags(i) == "NNS") nouns += sent(i).toLowerCase
+      else if (tags(i) == "NNP") nouns += sent(i).toLowerCase
     }
     logger.info("%s noun(s) is extracted from the document '%s'".format(nouns.size, fileName))
     nouns.toList
