@@ -25,7 +25,44 @@ import com.weiglewilczek.slf4s.Logging
  * @author Amir Moulavi
  */
 class NLP extends Logging {
+  import NLP._
 
+  val tokenizer = new TokenizerME(tokenizerModel)
+  val tagger = new POSTaggerME(posModel)
+
+  def createDocumentFrom(fileName:String, content:String):Document = Document(fileName, content, processFile(fileName, content))
+
+  def processFile(fileName:String, content:String):List[String] = {
+    require(posModelIn != null && tokenizerModelIn != null, "NLP pos and/or tokenizer are not initialized properly")
+    val nouns:mutable.ListBuffer[String] = mutable.ListBuffer[String]()
+    val sent = tokenize(fileName, content)
+    val tags = posTag(fileName, sent)
+    for (i <- 0 until tags.length) {
+      if (tags.apply(i).contains("NN")) {
+        nouns += sent.apply(i)
+      }
+    }
+    logger.info("%s noun(s) is extracted from the document '%s'".format(nouns.size, fileName))
+    nouns.toList
+  }
+
+  def tokenize(fileName:String, content:String):Array[String] = {
+    logger.info("Tokenizing document '%s'".format(fileName))
+    val tokens = tokenizer.tokenize(content)
+    logger.info("Done tokenizing")
+    tokens
+  }
+
+  def posTag(fileName:String, sent:Array[String]):Array[String] = {
+    logger.info("PoS tagging document '%s'".format(fileName))
+    val tags = tagger.tag(sent)
+    logger.info("Done PoS tagging")
+    tags
+  }
+
+}
+
+object NLP extends Logging {
   var posModelIn:InputStream = null
   var tokenizerModelIn:InputStream = null
   var posModel:POSModel = null
@@ -41,7 +78,6 @@ class NLP extends Logging {
       e.printStackTrace()
       logger.error("Could not load model files")
   }
-
   finally {
     if (posModelIn != null && tokenizerModelIn != null) {
       try {
@@ -55,27 +91,5 @@ class NLP extends Logging {
       }
     }
   }
-
-  def createDocumentFrom(fileName:String, content:String):Document = {
-    val nouns:mutable.ListBuffer[String] = mutable.ListBuffer[String]()
-    if (posModelIn != null && tokenizerModelIn != null) {
-      val tokenizer = new TokenizerME(tokenizerModel)
-      logger.info("Tokenizing document '%s'".format(fileName))
-      val sent = tokenizer.tokenize(content)
-      logger.info("Done tokenizing")
-      val tagger = new POSTaggerME(posModel)
-      logger.info("PoS tagging document '%s'".format(fileName))
-      val tags = tagger.tag(sent)
-      logger.info("Done PoS tagging")
-      for (i <- 0 until tags.length) {
-        if (tags.apply(i).contains("NN")) {
-          nouns += sent.apply(i)
-        }
-      }
-      logger.info("%s noun(s) is extracted from the document '%s'".format(nouns.size, fileName))
-    }
-    Document(fileName, content, nouns.toList)
-  }
-
 
 }

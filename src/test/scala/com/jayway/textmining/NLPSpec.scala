@@ -1,7 +1,6 @@
 package com.jayway.textmining
 
-import collection.immutable.ListMap
-import scala.collection.mutable
+import org.specs2.mutable.Specification
 
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
@@ -21,15 +20,24 @@ import scala.collection.mutable
  * @author Amir Moulavi
  */
 
-case class Document(fileName:String, content:String, nouns:List[String]) extends FeatureVector {
+class NLPSpec extends Specification {
 
-  lazy val uniqueNouns:Set[String] = nouns.toSet
+  val sentence = "All possible tags should be separated into individual tag. Tags are good for your health. Amir has different" +
+    " tagging system."
 
-  // number of occurrences of each unique noun
-  lazy val weightedTerms:Map[String, Double] = { for {
-    term <- uniqueNouns
-    weight = nouns.count( _ == term ).asInstanceOf[Double]
-  } yield (term, weight) }.map(identity)(collection.breakOut)
+  "NLP" should {
+    "tokenize sentences correctly" in {
+      val nlp = new NLP
+      nlp.tokenize("test", sentence).size mustEqual 23
+    }
+    "posTag sentences correctly" in {
+      val nlp = new NLP
+      val tokens = nlp.tokenize("test", sentence)
+      val posTagResult = nlp.posTag("test", tokens)
+      for ( i <- 0 until tokens.size)
+        println(tokens(i) + ": " + posTagResult(i))
+      success
+    }
+  }
 
-  lazy val weightedSum:Double = scala.math.sqrt(weightedTerms.map( (wt) => wt._2 * wt._2 ).sum)
 }
