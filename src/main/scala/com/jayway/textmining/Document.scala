@@ -1,8 +1,5 @@
 package com.jayway.textmining
 
-import collection.immutable.ListMap
-import scala.collection.mutable
-
 /**
  * Copyright 2012 Amir Moulavi (amir.moulavi@gmail.com)
  *
@@ -26,10 +23,25 @@ case class Document(fileName:String, content:String, nouns:List[String]) extends
   lazy val uniqueNouns:Set[String] = nouns.toSet
 
   // number of occurrences of each unique noun
-  lazy val weightedTerms:Map[String, Double] = { for {
+  lazy val nonUniqueWeightedTerms:Map[String, Double] = { for {
     term <- uniqueNouns
     weight = nouns.count( _ == term ).asInstanceOf[Double]
   } yield (term, weight) }.map(identity)(collection.breakOut)
 
+  lazy val weightedTerms:Map[String, Double] = nonUniqueWeightedTerms.foldLeft(nonUniqueWeightedTerms) {
+    (acc, pair:(String, Double)) =>
+      acc.find( currentItem => isPlural(currentItem._1, pair._1)) match {
+        case Some((item, value)) =>
+          val nacc = acc - pair._1
+          val newWeight = value + pair._2
+          nacc + (item -> newWeight)
+        case None => acc
+      }
+  }.toMap
+
   lazy val weightedSum:Double = scala.math.sqrt(weightedTerms.map( (wt) => wt._2 * wt._2 ).sum)
+
+  private def isPlural(currentItem:String, pair:String):Boolean = {
+    pair.diff(currentItem) == "s" || pair.diff(currentItem) == "ies"
+  }
 }
