@@ -20,7 +20,7 @@ import org.specs2.mutable.Specification
  * @author Amir Moulavi
  */
 
-class NLPSpec extends Specification {
+class NLPSpec extends Specification with TestData {
 
   val sentence = "All possible tags should be separated into individual tag. Tags are good for your health. Amir has different" +
     " tagging system."
@@ -36,6 +36,13 @@ class NLPSpec extends Specification {
       val posTagResult = nlp.posTag("test", tokens)
       for ( i <- 0 until tokens.size)
         println(tokens(i) + ": " + posTagResult(i))
+      success
+    }
+    "extract nouns for all documents" in {
+      val nlp = new NLP
+      docs.foreach { f =>
+        (nlp.processFile(f._1, f._2).size > 0) mustEqual true
+      }
       success
     }
   }
