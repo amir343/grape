@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 class KMeanClusterSpec extends Specification with TestData {
 
   val k = 2
-  val kmeanCluster = new KMeanCluster(files, k) with NLPFeatureSelection
+  val kmeanCluster = new KMeanCluster(docs, k) with NLPFeatureSelection
   val clusters = kmeanCluster.doCluster()
 
   "KMean Clustering" should {

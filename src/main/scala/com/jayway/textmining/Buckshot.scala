@@ -22,20 +22,16 @@ import scalaz.{Failure, Success}
  * @author Amir Moulavi
  */
 
-class Buckshot(k:Int, files:List[File])
+class Buckshot(files:List[(String, String)], k:Int)
   extends RandomSelector
-  with FileReader
   with Logging { this:FeatureSelection =>
 
   require(k < files.size, "K can not be greater than number of documents")
   require(k > 0, "K must be a positive non-zero integer")
 
-  val fileContents:List[String] = readFiles(files) match {
-    case Success(x) => x
-    case Failure(x) => throw new RuntimeException(x)
-  }
+  val fileContents:List[String] = files.map( _._2 )
 
-  val documents:List[Document] = selectFeatures(files.map( f => f.getName ).zip(fileContents))
+  val documents:List[Document] = selectFeatures(files)
 
   val vectorSpace = VectorSpace()
   documents.foreach( d => vectorSpace.addDimension(d.uniqueNouns))
@@ -46,7 +42,7 @@ class Buckshot(k:Int, files:List[File])
     val selectedFiles = `select kd random document`
     val remainingFiles = files diff selectedFiles
     val remainingDocs = convertFilesToDocuments(remainingFiles)
-    val clusters = (new HierarchicalAgglomerativeCluster(k, selectedFiles) with NLPFeatureSelection).clusterDocuments()
+    val clusters = (new HierarchicalAgglomerativeCluster(selectedFiles, k) with NLPFeatureSelection).clusterDocuments()
     clusters.foreach( c => c.calculateNewCentroid() )
     remainingDocs.foreach { d =>
       val distances = clusters.map( c => (c, mathUtils.euclideanDistance(d, c.centroid)) )
@@ -56,11 +52,10 @@ class Buckshot(k:Int, files:List[File])
     clusters
   }
 
-  private def convertFilesToDocuments(list:List[File]):List[Document] = {
-    val convertedFiles = list.map(f => f.getName).zip(list.map(f => f.getPath))
-    selectFeatures(convertedFiles)
+  private def convertFilesToDocuments(list:List[(String, String)]):List[Document] = {
+    selectFeatures(list)
   }
 
-  private def `select kd random document`:List[File] =
-    selectRandom[File](math.sqrt((k*documents.size).asInstanceOf[Double]).asInstanceOf[Int], files)
+  private def `select kd random document`:List[(String, String)] =
+    selectRandom[(String, String)](math.sqrt((k*documents.size).asInstanceOf[Double]).asInstanceOf[Int], files)
 }

@@ -23,7 +23,7 @@ import java.io.File
  * @author Amir Moulavi
  */
 
-class HierarchicalAgglomerativeCluster(k:Int, files:List[File])
+class HierarchicalAgglomerativeCluster(files:List[(String, String)], k:Int)
   extends Logging
   with FileReader { this:FeatureSelection =>
 
@@ -32,12 +32,9 @@ class HierarchicalAgglomerativeCluster(k:Int, files:List[File])
 
   def getK = k
 
-  val fileContents:List[String] = readFiles(files) match {
-    case Success(x) => x
-    case Failure(x) => throw new RuntimeException(x)
-  }
+  val fileContents:List[String] = files.map ( _._2 )
 
-  val documents:List[Document] = selectFeatures(files.map( f => f.getName ).zip(fileContents))
+  val documents:List[Document] = selectFeatures(files)
 
   val clusters:List[Cluster] = documents.map( d => Cluster(d) )
 

@@ -23,7 +23,7 @@ import scalaz.{Failure, Success}
  * @author Amir Moulavi
  */
 
-class KMeanCluster(files:List[File], k:Int)
+class KMeanCluster(files:List[(String, String)], k:Int)
   extends RandomSelector
   with FileReader
   with Logging { this:FeatureSelection =>
@@ -31,12 +31,9 @@ class KMeanCluster(files:List[File], k:Int)
   require( k < files.size, "'k' can not be greater than the document size" )
   require(k > 0, "K must be a positive non-zero integer")
 
-  val fileContents:List[String] = readFiles(files) match {
-    case Success(x) => x
-    case Failure(x) => throw new RuntimeException(x)
-  }
+  val fileContents:List[String] = files.map( _._2 )
 
-  val documents:List[Document] = selectFeatures(files.map( f => f.getName ).zip(fileContents))
+  val documents:List[Document] = selectFeatures(files)
 
   val iterations:Int = 100
   logger.info("Number of iterations: %s".format(iterations))
