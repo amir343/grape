@@ -68,9 +68,9 @@ object NLP extends Logging {
   var tokenizerModel:TokenizerModel = null
 
   try {
-    tokenizerModelIn = new FileInputStream("src/main/resources/en-token.bin")
+    tokenizerModelIn = getClass.getClassLoader.getResourceAsStream("en-token.bin")
     tokenizerModel = new TokenizerModel(tokenizerModelIn)
-    posModelIn = new FileInputStream("src/main/resources/en-pos-maxent.bin")
+    posModelIn = getClass.getClassLoader.getResourceAsStream("en-pos-maxent.bin")
     posModel = new POSModel(posModelIn)
   } catch {
     case e =>
