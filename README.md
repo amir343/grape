@@ -2,7 +2,7 @@ Grape
 =====
 
 Grape is a collection of document [clustering](http://en.wikipedia.org/wiki/Data_clustering) algorithms written in Scala.
-It avails from [Apache OpenNLP](http://opennlp.apache.org/) to extract specific feature from the each document and build
+It avails from [Apache OpenNLP](http://opennlp.apache.org/) to extract specific feature from each document and build
 the final vector space that is used in different approaches. Grape contains the following algorithms (at the moment):
 
 * KMean Clustering
