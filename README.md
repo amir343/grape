@@ -9,6 +9,23 @@ the final vector space that is used in different approaches. Grape contains the 
 * Hierarchical Agglomerative Clustering
 * Buckshot Clustering
 
+How to use
+==========
+
+An example how to use KMean clustering on your documents:
+
+```scala
+import com.jayway.textmining.{NLPFeatureSelection, Cluster, KMeanCluster}
+
+// number of clusters
+val k = ...
+
+// A document is a pair of (Document ID, Document Content). ID can be anything.
+val docs: List[(String, String)] = ...
+
+val kMeanCluster = new KMeanCluster(docs, k) with NLPFeatureSelection
+val clusters:List[Cluster] = kMeanCluster.doCluster()
+```
 
 License
 -------
